@@ -1,19 +1,31 @@
-
-
+<svelte:head>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+</svelte:head>
 <main>
-	<button on:click={drawImage}>拍照</button>
+	<Button color="primary" on:click={drawImage}>拍照</Button>
 	{#if imageData}
 	<img src={imageData} alt="" id="image">
 	{/if}
+	<Modal body {isOpen} {toggle}>
+		<ModalHeader>访问用户媒体设备失败</ModalHeader>
+		<ModalBody>
+			<p>请确保摄像头可访问</p>
+			<p>Edge浏览器中的设置<a target="_blank" href="edge://settings/content/camera">edge://settings/content/camera</a></p>
+			<p>Chrome浏览器中的设置: <a target="_blank" href="chrome://settings/content/camera">chrome://settings/content/camera</a></p>
+		</ModalBody>
+	</Modal>
 </main>
+
 
 
 <script lang="ts">
 import { onMount } from "svelte";
-
+import {Button, Modal, ModalHeader, ModalBody} from 'sveltestrap';
 
 let video: HTMLVideoElement;
 let imageData: string;
+let isOpen: boolean = false;
+const toggle = () => (isOpen = !isOpen);
 const width = 500;
 const height = 500;
 
@@ -31,16 +43,13 @@ function getUserMedia() {
 		video.play();
 	}).catch((error: Error) => {
 		console.log('error', error.message, error.stack, error.name)
-		console.log('访问用户媒体设备失败，请确保使用的是Edge或者Chrome浏览器！');
-		console.log('请确保摄像头可访问')
-		console.log('Edge浏览器中的设置: edge://settings/content/camera');
-		console.log('Chrome浏览器中的设置: chrome://settings/content/camera');
+		toggle();
 	})
 }
 
 function drawImage() {
 	if (!video) {
-		alert('请先打开摄像头')
+		toggle();
 		return;
 	}
 	const canvas = document.createElement('canvas');
